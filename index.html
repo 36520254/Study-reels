@@ -1,405 +1,218 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyReels</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            margin: 0;
-            background-color: #000;
-            color: white;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
- 
-        .phone-screen {
-            width: 100vw;
-            max-width: 400px;
-            height: 100vh;
-            background-color: #09090b;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
- 
-        /* ─── ゲーミフィケーション・ヘッダー ─── */
-        .top-header {
-            padding: 40px 16px 10px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-            position: absolute;
-            top: 0;
-            width: calc(100% - 32px);
-            z-index: 10;
-        }
- 
-        .streak-badge {
-            background-color: rgba(0, 0, 0, 0.5);
-            padding: 6px 12px;
-            border-radius: 20px;
-            color: #f97316;
-            font-weight: bold;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
- 
-        .level-container {
-            text-align: right;
-        }
- 
-        .level-text {
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
- 
-        .xp-bar-bg {
-            width: 100px;
-            height: 6px;
-            background-color: #3f3f46;
-            border-radius: 3px;
-            overflow: hidden;
-        }
- 
-        .xp-bar-fill {
-            width: 85%; /* 850/1000 XP */
-            height: 100%;
-            background-color: #06b6d4;
-        }
- 
-        /* ─── コンテンツエリア ─── */
-        .main-content {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            display: none; /* JSで切り替えます */
-        }
- 
-        .main-content.active {
-            display: block;
-        }
- 
-        /* リール画面 */
-        #reels-tab {
-            height: 100%;
-            background-color: #0f172a; /* 1本目の動画の背景色 */
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding-bottom: 80px;
-            box-sizing: border-box;
-            position: relative;
-        }
- 
-        .reel-bg-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 40px;
-            font-weight: 900;
-            color: rgba(255,255,255,0.05);
-            white-space: nowrap;
-        }
- 
-        .caption-area {
-            padding: 16px;
-            z-index: 2;
-        }
- 
-        .author-name {
-            font-weight: bold;
-            font-size: 16px;
-        }
- 
-        .author-badge {
-            display: inline-block;
-            background-color: rgba(6, 182, 212, 0.2);
-            color: #06b6d4;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-top: 4px;
-            font-weight: bold;
-        }
- 
-        .reel-title {
-            margin-top: 8px;
-            font-size: 15px;
-            color: #e4e4e7;
-        }
- 
-        /* 仲間（コミュニティ）画面 */
-        #community-tab {
-            padding: 60px 16px 80px 16px;
-        }
- 
-        .tab-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
- 
-        .tab-subtitle {
-            color: #a1a1aa;
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
- 
-        .mentor-card {
-            background-color: #18181b;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
- 
-        .mentor-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
- 
-        .mentor-avatar {
-            font-size: 32px;
-        }
- 
-        .mentor-info .name {
-            font-weight: bold;
-            font-size: 18px;
-            margin: 0;
-        }
- 
-        .mentor-info .univ {
-            color: #3b82f6;
-            font-size: 14px;
-            font-weight: bold;
-            margin: 0;
-        }
- 
-        .mentor-advice {
-            color: #d4d4d8;
-            font-size: 14px;
-            margin: 12px 0;
-            font-style: italic;
-        }
- 
-        .mentor-tags {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
- 
-        .tag {
-            color: #71717a;
-            background-color: rgba(63, 63, 70, 0.5);
-            font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
- 
-        .chat-btn {
-            width: 100%;
-            background-color: rgba(255,255,255,0.1);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
- 
-        /* ─── ボトムナビゲーション ─── */
-        .nav-bar {
-            height: 70px;
-            border-top: 1px solid #27272a;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.85);
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            z-index: 10;
-        }
- 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            color: #71717a;
-            cursor: pointer;
-            width: 50px;
-        }
- 
-        .nav-item i {
-            font-size: 22px;
-        }
- 
-        .nav-item.active {
-            color: #06b6d4;
-        }
- 
-        /* 中央の丸ボタン */
-        .center-btn-container {
-            position: relative;
-            top: -10px;
-        }
- 
-        .center-btn {
-            width: 56px;
-            height: 56px;
-            background-color: #000;
-            border: 3px solid #06b6d4;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
- 
-        .center-btn-inner {
-            width: 20px;
-            height: 20px;
-            background-color: white;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Study Reels (Preview)</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/feather-icons"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cyber: {
+              bg: "#05050a",
+              card: "rgba(12, 12, 25, 0.7)",
+              cyan: "#00f0ff",
+              magenta: "#ff007f",
+              green: "#00ff66",
+              purple: "#9d4edd",
+            }
+          },
+          boxShadow: {
+            'neon-cyan': '0 0 10px rgba(0, 240, 255, 0.5), 0 0 20px rgba(0, 240, 255, 0.2)',
+            'neon-magenta': '0 0 10px rgba(255, 0, 127, 0.5)',
+            'neon-green': '0 0 10px rgba(0, 255, 102, 0.5)',
+          },
+          animation: {
+            'scanline': 'scanline 6s linear infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            scanline: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(100%)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* スクロールバー非表示・3D反転用カスタムCSS */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    .perspective-1000 { perspective: 1000px; }
+    .transform-style-3d { transform-style: preserve-3d; }
+    .backface-hidden { backface-visibility: hidden; }
+    .rotate-y-180 { transform: rotateY(180deg); }
+    
+    /* サイバーグリッド背景 */
+    .bg-grid {
+      background-image: 
+        linear-gradient(rgba(0, 240, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+  </style>
 </head>
-<body>
- 
-    <div class="phone-screen">
-        <div class="top-header">
-            <div class="streak-badge">
-                <i class="fa-solid fa-fire"></i> 34 Days
-            </div>
-            <div class="level-container">
-                <div class="level-text">Lv.15</div>
-                <div class="xp-bar-bg">
-                    <div class="xp-bar-fill"></div>
-                </div>
-            </div>
-        </div>
- 
-        <div id="reels-tab" class="main-content active" onclick="nextReel()">
-            <div id="reel-type-text" class="reel-bg-text">▶ PLAYING</div>
-            <div class="caption-area">
-                <div id="reel-author" class="author-name">東大理三志望 ＠数学の神</div>
-                <div id="reel-badge" class="author-badge">駿台偏差値83</div>
-                <div id="reel-title" class="reel-title">【15秒でわかる】部分積分の最強の裏技</div>
-            </div>
-        </div>
- 
-        <div id="community-tab" class="main-content">
-            <div class="tab-title">合格した先輩（メンター）</div>
-            <div class="tab-subtitle">志望校の先輩を見つけて、学習計画をコピーしよう。</div>
- 
-            <div class="mentor-card">
-                <div class="mentor-header">
-                    <span class="mentor-avatar">🎓</span>
-                    <div class="mentor-info">
-                        <p class="name">山本 隼人</p>
-                        <p class="univ">東京大学 理科I類</p>
-                    </div>
-                </div>
-                <p class="mentor-advice">「基礎を完璧にしてから過去問へ。」</p>
-                <div class="mentor-tags">
-                    <span class="tag">#東大</span><span class="tag">#数学</span><span class="tag">#物理</span>
-                </div>
-                <button class="chat-btn">この先輩に相談する</button>
-            </div>
- 
-            <div class="mentor-card">
-                <div class="mentor-header">
-                    <span class="mentor-avatar">📚</span>
-                    <div class="mentor-info">
-                        <p class="name">佐々木 奈緒</p>
-                        <p class="univ">早稲田大学 政治経済学部</p>
-                    </div>
-                </div>
-                <p class="mentor-advice">「英語は単語より構文力。」</p>
-                <div class="mentor-tags">
-                    <span class="tag">#早稲田</span><span class="tag">#英語</span><span class="tag">#文系</span>
-                </div>
-                <button class="chat-btn">この先輩に相談する</button>
-            </div>
-        </div>
- 
-        <div class="nav-bar">
-            <div class="nav-item active" onclick="switchTab('reels')">
-                <i class="fa-solid fa-house"></i>
-                <span>Reels</span>
-            </div>
-            <div class="nav-item" onclick="alert('集中モード起動（順次実装）')">
-                <i class="fa-solid fa-clock"></i>
-                <span>集中</span>
-            </div>
-            <div class="center-btn-container">
-                <div class="center-btn">
-                    <div class="center-btn-inner"></div>
-                </div>
-            </div>
-            <div class="nav-item" onclick="alert('管理モード（順次実装）')">
-                <i class="fa-solid fa-book-open"></i>
-                <span>管理</span>
-            </div>
-            <div class="nav-item" onclick="switchTab('community')">
-                <i class="fa-solid fa-user-group"></i>
-                <span>仲間</span>
-            </div>
-        </div>
-    </div>
- 
-    <script>
-        // タブ切り替えシステム
-        function switchTab(tabName) {
-            // 全てのタブを非アクティブにする
-            document.querySelectorAll('.main-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            // 選んだタブをアクティブにする
-            if(tabName === 'reels') {
-                document.getElementById('reels-tab').classList.add('active');
-                event.currentTarget.classList.add('active');
-            } else if(tabName === 'community') {
-                document.getElementById('community-tab').classList.add('active');
-                event.currentTarget.classList.add('active');
-            }
-        }
- 
-        // リールタップでデータが切り替わるシステム
-        const reelsData = [
-            { author: "東大理三志望 ＠数学の神", badge: "駿台偏差値83", title: "【15秒でわかる】部分積分の最強の裏技", type: "▶ PLAYING", color: "#0f172a" },
-            { author: "英検1級マスター", badge: "証明済み", title: "タップで裏返る！ガチで出る熟語10選", type: "🎴 FLASHCARD", color: "#1e1b4b" }
-        ];
-        let currentReelIndex = 0;
- 
-        function nextReel() {
-            currentReelIndex = (currentReelIndex + 1) % reelsData.size; // ※注: reelsData.sizeではなく正しくはlengthですが、Androidコードの「.size」の仕組みを再現
-            // 修正版安全コードに自動調整
-            currentReelIndex = (currentReelIndex + 1) % reelsData.length;
-            const data = reelsData[currentReelIndex];
-            
-            document.getElementById('reels-tab').style.backgroundColor = data.color;
-            document.getElementById('reel-type-text').innerText = data.type;
-            document.getElementById('reel-author').innerText = data.author;
-            document.getElementById('reel-badge').innerText = data.badge;
-            document.getElementById('reel-title').innerText = data.title;
-        }
-    </script>
+<body class="bg-cyber-bg text-white h-screen overflow-hidden flex flex-col items-center bg-grid">
+
+  <div class="w-full max-w-md p-4 z-20 shrink-0">
+    <div class="bg-cyber-card backdrop-blur-md border border-cyber-purple/40 rounded-2xl p-4 flex items-center justify-between shadow-lg">
+      <div class="flex flex-col">
+        <span class="text-[10px] font-mono text-cyber-purple tracking-widest font-bold">FOCUS SESSION</span>
+        <span id="timer-display" class="text-3xl font-mono font-black tracking-widest drop-shadow-[0_0_8px_rgba(157,78,221,0.6)]">25:00</span>
+      </div>
+      <div class="flex space-x-2">
+        <button id="timer-btn" class="p-2.5 rounded-xl border border-cyber-green/50 text-cyber-green hover:bg-cyber-green/10 shadow-neon-green transition-all">
+          <i data-feather="play" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full max-w-md flex-1 overflow-y-scroll snap-y snap-mandatory no-scrollbar pb-20 px-4 space-y-6">
+    
+    <div class="w-full h-[75vh] bg-cyber-card backdrop-blur-xl border border-cyber-cyan/30 rounded-3xl p-6 flex flex-col shadow-neon-cyan relative overflow-hidden shrink-0 snap-center">
+      <div class="absolute top-0 left-0 w-full h-1 bg-cyber-cyan/50 animate-scanline pointer-events-none"></div>
+      
+      <div class="flex justify-between items-center z-10">
+        <div>
+          <span class="text-xs font-mono px-3 py-1 rounded-full border border-cyber-magenta text-cyber-magenta uppercase tracking-widest">PHYSICS</span>
+          <h2 class="text-xl font-bold mt-2 font-mono">シュレディンガーの猫</h2>
+        </div>
+        <div class="bg-black/40 px-3 py-1.5 rounded-xl border border-white/10 flex items-center space-x-2 text-sm font-mono font-bold">
+          <span class="text-cyber-green flex items-center"><i data-feather="shield" class="w-3 h-3 mr-1"></i>VERIFIED</span>
+          <span class="text-cyber-magenta flex items-center"><i data-feather="zap" class="w-3 h-3 mr-1"></i>7d</span>
+        </div>
+      </div>
+
+      <div class="my-4 flex-1 bg-black/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center relative z-10">
+        <p class="text-cyber-cyan font-mono text-sm text-center mb-4 leading-relaxed bg-cyber-cyan/10 p-3 rounded-lg border border-cyber-cyan/20">波の性質と粒子の性質を同時に持つミクロの世界。状態の重ね合わせを数式化したのがこれだ。</p>
+        <div class="w-full flex-1 bg-gradient-to-tr from-cyber-purple/20 to-cyber-cyan/20 rounded-xl flex items-center justify-center border border-dashed border-cyber-cyan/30">
+          <span class="text-xs text-cyber-cyan/70 font-mono animate-pulse-slow">[ VIDEO FEED_ STREAMING... ]</span>
+        </div>
+      </div>
+
+      <div class="perspective-1000 h-40 z-10 cursor-pointer group" onclick="toggleCard(this)">
+        <div class="relative w-full h-full transition-transform duration-500 transform-style-3d">
+          
+          <div class="absolute inset-0 bg-cyber-cyan/5 border border-cyber-cyan/40 rounded-2xl p-4 flex flex-col justify-between backface-hidden group-hover:border-cyber-cyan">
+            <div class="flex justify-between items-center text-xs font-mono text-gray-400">
+              <span>⚡️ TECH QUESTION</span>
+              <i data-feather="refresh-cw" class="w-4 h-4 text-cyber-cyan"></i>
+            </div>
+            <div class="flex-1 flex items-center justify-center">
+              <p class="font-bold text-center">観測するまで状態が確定しない、ミクロの性質を何と呼ぶ？</p>
+            </div>
+          </div>
+          
+          <div class="absolute inset-0 bg-cyber-magenta/10 border border-cyber-magenta rounded-2xl p-4 flex flex-col justify-between backface-hidden rotate-y-180 shadow-neon-magenta">
+            <div class="flex justify-between items-center text-xs font-mono text-gray-400">
+              <span>🧠 DECRYPTED</span>
+              <i data-feather="refresh-cw" class="w-4 h-4 text-cyber-magenta"></i>
+            </div>
+            <div class="flex-1 flex items-center justify-center">
+              <p class="font-bold text-center text-lg">状態の重ね合わせ</p>
+            </div>
+            <div class="mt-2 text-[10px] bg-black/40 p-2 rounded-lg border border-cyber-magenta/20 font-mono text-gray-300">
+              <b class="text-cyber-magenta">AI HINT:</b> 箱を開ける前の猫は、生きていて同時に死んでいる。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full h-[75vh] bg-cyber-card backdrop-blur-xl border border-cyber-cyan/30 rounded-3xl p-6 flex flex-col shadow-neon-cyan relative overflow-hidden shrink-0 snap-center">
+      <div class="absolute top-0 left-0 w-full h-1 bg-cyber-cyan/50 animate-scanline pointer-events-none"></div>
+      <div class="flex justify-between items-center z-10">
+        <div>
+          <span class="text-xs font-mono px-3 py-1 rounded-full border border-cyber-magenta text-cyber-magenta uppercase tracking-widest">ENGLISH</span>
+          <h2 class="text-xl font-bold mt-2 font-mono">暗号文法ハック</h2>
+        </div>
+      </div>
+      <div class="my-4 flex-1 bg-black/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-center items-center relative z-10">
+        <p class="text-cyber-cyan font-mono text-sm text-center mb-4 leading-relaxed bg-cyber-cyan/10 p-3 rounded-lg border border-cyber-cyan/20">AI時代だからこそ差がつくコア語彙。context（文脈/背景）をハックせよ。</p>
+        <div class="w-full flex-1 bg-gradient-to-tr from-cyber-purple/20 to-cyber-cyan/20 rounded-xl flex items-center justify-center border border-dashed border-cyber-cyan/30">
+          <span class="text-xs text-cyber-cyan/70 font-mono animate-pulse-slow">[ VIDEO FEED_ STREAMING... ]</span>
+        </div>
+      </div>
+      <div class="perspective-1000 h-40 z-10 cursor-pointer group" onclick="toggleCard(this)">
+        <div class="relative w-full h-full transition-transform duration-500 transform-style-3d">
+          <div class="absolute inset-0 bg-cyber-cyan/5 border border-cyber-cyan/40 rounded-2xl p-4 flex flex-col justify-between backface-hidden group-hover:border-cyber-cyan">
+            <div class="flex justify-between items-center text-xs font-mono text-gray-400">
+              <span>⚡️ TECH QUESTION</span><i data-feather="refresh-cw" class="w-4 h-4 text-cyber-cyan"></i>
+            </div>
+            <div class="flex-1 flex items-center justify-center">
+              <p class="font-bold text-center">「con(共に)」+「texere(織る)」が語源の、文脈や背景を意味する単語は？</p>
+            </div>
+          </div>
+          <div class="absolute inset-0 bg-cyber-magenta/10 border border-cyber-magenta rounded-2xl p-4 flex flex-col justify-between backface-hidden rotate-y-180 shadow-neon-magenta">
+            <div class="flex justify-between items-center text-xs font-mono text-gray-400">
+              <span>🧠 DECRYPTED</span><i data-feather="refresh-cw" class="w-4 h-4 text-cyber-magenta"></i>
+            </div>
+            <div class="flex-1 flex items-center justify-center">
+              <p class="font-bold text-center text-lg font-mono">Context</p>
+            </div>
+            <div class="mt-2 text-[10px] bg-black/40 p-2 rounded-lg border border-cyber-magenta/20 font-mono text-gray-300">
+              <b class="text-cyber-magenta">AI HINT:</b> サイバー空間のログを読む時も、この「コンテキスト」が最重要パラメータになる。
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // アイコンの初期化
+    feather.replace();
+
+    // 暗記カードの裏返しロジック
+    function toggleCard(element) {
+      const innerCard = element.firstElementChild;
+      if (innerCard.classList.contains('rotate-y-180')) {
+        innerCard.classList.remove('rotate-y-180');
+      } else {
+        innerCard.classList.add('rotate-y-180');
+      }
+    }
+
+    // ポモドーロタイマーの簡易ロジック
+    let timeLeft = 25 * 60;
+    let timerId = null;
+    let isRunning = false;
+    
+    const display = document.getElementById('timer-display');
+    const btn = document.getElementById('timer-btn');
+
+    function updateDisplay() {
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      display.textContent = `${m}:${s}`;
+    }
+
+    btn.addEventListener('click', () => {
+      if (isRunning) {
+        clearInterval(timerId);
+        btn.innerHTML = '<i data-feather="play" class="w-5 h-5"></i>';
+        btn.className = "p-2.5 rounded-xl border border-cyber-green/50 text-cyber-green hover:bg-cyber-green/10 shadow-neon-green transition-all";
+      } else {
+        timerId = setInterval(() => {
+          if (timeLeft > 0) { timeLeft--; updateDisplay(); }
+        }, 1000);
+        btn.innerHTML = '<i data-feather="pause" class="w-5 h-5"></i>';
+        btn.className = "p-2.5 rounded-xl border border-cyber-magenta/50 text-cyber-magenta hover:bg-cyber-magenta/10 shadow-neon-magenta transition-all";
+      }
+      feather.replace();
+      isRunning = !isRunning;
+    });
+  </script>
 </body>
 </html>
